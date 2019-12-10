@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <math.h>
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE 1
 #endif
@@ -44,7 +43,9 @@ void addCharToConvertVar(char target_char) {
 void printHexToDec() {
   int outputNumber = 0;
   for (int i = endOfConvVariable-1; i >= 2; i--) {
-    outputNumber += (convVariable[i] - '0')*(int)pow(16, endOfConvVariable-1-i);
+    int j = 0;
+    for (j = 0; j <= 15; j ++) { if (convVariable[i] == hexNumbers[j]) break;}
+    outputNumber += (j)*(int)pow(16, endOfConvVariable-1-i);
   }
   char *output;
   asprintf(&output, "%d", outputNumber);
@@ -56,13 +57,11 @@ void printHexToDec() {
 
 void printDecToHex() {
   int number = atoi(convVariable);
-  printf("Number: %d\n", number);
   int len = 0;
   while (number > 0) {
     number /= 16;
     len++;
   }
-  printf("Len: %d\n", len);
   char output[len+1];
   output[len] = '\0';
   number = atoi(convVariable);
@@ -95,14 +94,12 @@ void addConvToOutput() {
 
   for (int i = 2; i < endOfConvVariable; i++) {
     if (state == 2) {
-      printf(" - hex: '%c'\n", convVariable[i]);
       if (!((convVariable[i] >= 48 && convVariable[i] <= 57)||(convVariable[i] >= 65 && convVariable[i] <= 70))){
         state = 0;
         break;
       }
     }
     if (state == 1) {
-      printf(" - num: '%c'\n", convVariable[i]);
       if (convVariable[i] < 48 || convVariable[i] > 57){
         state = 0;
         break;
