@@ -6,6 +6,10 @@
 #include <ctype.h>
 #include <math.h>
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 const char *optString = "h";
 
 char *outputString = NULL;
