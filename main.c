@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <math.h>
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE 1
 #endif
@@ -51,7 +50,7 @@ void printHexToDec() {
   char *output;
   asprintf(&output, "%d", outputNumber);
 
-  for (int i = 0; i <= strlen(output); i++) {
+  for (int i = 0; i < strlen(output); i++) {
     addCharToOutput(output[i]);
   }
 }
@@ -63,7 +62,7 @@ void printDecToHex() {
     number /= 16;
     len++;
   }
-  char output[len+1];
+  char output[len];
   output[len] = '\0';
   number = atoi(convVariable);
   while (number > 0) {
@@ -85,10 +84,6 @@ void justPrint() {
 
 void addConvToOutput() {
   short int state = 1;
-
-  // state 1 - numbers
-  // state 2 - hex
-  // state 0 - nothing
 
   if (convVariable[0] == '0' && convVariable[1] == 'x') state = 2;
   if (!(convVariable[1] >= 48 && convVariable[1] <= 57) && state == 1) state = 0;
@@ -130,13 +125,6 @@ void addConvToOutput() {
 void startJob() {
   short int state = 0;
   char inChar;
-
-  // state 1 - stasrt reading numbers
-  // state 10 - first number is 0
-  // state 2 - reading 0x
-  // state 3 - reading 10
-  // state 4 - finish reading
-  // state 0 - casual reading
 
   while (!feof(globalArgs.inputFile)){
     fscanf(globalArgs.inputFile,"%c",&inChar);
@@ -220,7 +208,7 @@ int main(int argc, char** argv) {
   }
 
   if (endOfOutputString != 0) {
-    for (int i = 0; i <= endOfOutputString; i++) {
+    for (int i = 0; i < endOfOutputString-1; i++) {
       fprintf(globalArgs.outputFile, "%c", outputString[i]);
     }
   }
