@@ -143,6 +143,8 @@ void startJob() {
       addCharToOutput(inChar);
     }
   }
+  if (state == 1) addConvToOutput();
+  putc('\n', globalArgs.outputFile);
 }
 
 void display_usage(char* name) {
@@ -215,6 +217,7 @@ int main(int argc, char** argv) {
           fprintf(globalArgs.outputFile, "%c", outputString[i]);
       }
     }
+    putc('\n', globalArgs.outputFile);
   return 0;
   }
 }
