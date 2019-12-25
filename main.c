@@ -128,8 +128,7 @@ void startJob() {
 
   while (!feof(globalArgs.inputFile)){
     fscanf(globalArgs.inputFile,"%c",&inChar);
-    if ((inChar >= 48 && inChar <= 57) && state == 0 && ((endOfOutputString > 0 && (outputString[endOfOutputString-1] == ' ' || outputString[endOfOutputString-1] == '\n' || outputString[endOfOutputString-1] == '\0')) || endOfOutputString
-   == 0)) {
+    if ((inChar >= 48 && inChar <= 57) && state == 0 && ((endOfOutputString > 0 && (outputString[endOfOutputString-1] == ' ' || outputString[endOfOutputString-1] == '\n' || outputString[endOfOutputString-1] == '\0')) || endOfOutputString == 0)) {
       state = 1;
     } else if ((inChar == ' ' || inChar == '\n' || inChar == '\0') && (state == 1)) {
       state = 2;
@@ -206,12 +205,16 @@ int main(int argc, char** argv) {
   if (globalArgs.inputPath == NULL) {
     endOfOutputString -= 2;
   }
-
   if (endOfOutputString != 0) {
-    for (int i = 0; i < endOfOutputString-1; i++) {
-      fprintf(globalArgs.outputFile, "%c", outputString[i]);
+    if (globalArgs.inputPath != NULL) {
+      for (int i = 0; i < endOfOutputString-1; i++) {
+        fprintf(globalArgs.outputFile, "%c", outputString[i]);
+        } 
+      } else {
+        for (int i = 0; i <= endOfOutputString; i++) {
+          fprintf(globalArgs.outputFile, "%c", outputString[i]);
+      }
     }
-  }
-
   return 0;
+  }
 }
