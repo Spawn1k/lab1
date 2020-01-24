@@ -27,12 +27,14 @@ struct globalArgs_t {
   FILE* outputFile;
 } globalArgs;
 
+//Add char to output pool
 void addCharToOutput(char target_char) {
   endOfOutputString++;
   outputString = realloc(outputString, endOfOutputString * sizeof(char));
   outputString[endOfOutputString-1] = target_char;
 }
 
+//Add char to converting pool
 void addCharToConvertVar(char target_char) {
   endOfConvVariable++;
   convVariable = realloc(convVariable, endOfConvVariable * sizeof(char));
@@ -40,6 +42,7 @@ void addCharToConvertVar(char target_char) {
   convVariable[endOfConvVariable] = '\0';
 }
 
+//Convert hex to dec and print
 void printHexToDec() {
   int outputNumber = 0;
   for (int i = endOfConvVariable-1; i >= 2; i--) {
@@ -55,17 +58,22 @@ void printHexToDec() {
   }
 }
 
+//Convert dec to hex and print
 void printDecToHex() {
+  //printf("Conv: %s\n", convVariable);
   int number = atoi(convVariable);
   int len = 0;
   while (number > 0) {
     number /= 16;
     len++;
+    //printf("len: %d num: %d\n", len, number);
   }
-  char output[len];
+  char output[len+1];
   output[len] = '\0';
   number = atoi(convVariable);
+  //printf("%d\n", number);
   while (number > 0) {
+    //printf("out[%d]: %c, num: %d, len: %d\n", len - 1, hexNumbers[number % 16], number / 16, len - 1);
     output[len-1] = hexNumbers[number % 16];
     number /= 16;
     len--;
@@ -73,20 +81,29 @@ void printDecToHex() {
 
   addCharToOutput('0');
   addCharToOutput('x');
+
+  //printf("%d\n", strlen(output));
   for (int i = 0; i < strlen(output); i++) {
+    //printf("i: %d, out: %c\n", i, output[i]);
     addCharToOutput(output[i]);
   }
 }
 
+// Just print buffer :)
 void justPrint() {
   for (int i = 0; i < endOfConvVariable; i++) addCharToOutput(convVariable[i]);
 }
 
+// Detect number system and add it to output
 void addConvToOutput() {
   short int state = 1;
 
+  // state 1 - numbers
+  // state 2 - hex
+  // state 0 - nothing
+
   if (convVariable[0] == '0' && convVariable[1] == 'x') state = 2;
-  if (!(convVariable[1] >= 48 && convVariable[1] <= 57) && state == 1) state = 0;
+  if (!((convVariable[1] >= 48 && convVariable[1] <= 57) || convVariable[1] == '\0') && state == 1) state = 0;
 
   for (int i = 2; i < endOfConvVariable; i++) {
     if (state == 2) {
@@ -122,18 +139,29 @@ void addConvToOutput() {
   endOfConvVariable = 0;
 }
 
+// Detect somthing looks like numbers and add it to buffer
 void startJob() {
   short int state = 0;
   char inChar;
 
-  while (!feof(globalArgs.inputFile)){
-    fscanf(globalArgs.inputFile,"%c",&inChar);
-    if ((inChar >= 48 && inChar <= 57) && state == 0 && ((endOfOutputString > 0 && (outputString[endOfOutputString-1] == ' ' || outputString[endOfOutputString-1] == '\n' || outputString[endOfOutputString-1] == '\0')) || endOfOutputString == 0)) {
+  // state 1 - stasrt reading numbers
+  // state 10 - first number is 0
+  // state 2 - reading 0x
+  // state 3 - reading 10
+  // state 4 - finish reading
+  // state 0 - casual reading
+
+  while ((inChar=getc(globalArgs.inputFile)) != EOF){
+    //fscanf(globalArgs.inputFile,"%c",&inChar);
+    //printf("Input: %c\n", inChar);
+    if ((inChar >= 48 && inChar <= 57) && state == 0 && ((endOfOutputString > 0 && (outputString[endOfOutputString-1] == ' ' || outputString[endOfOutputString-1] == '\n' || outputString[endOfOutputString-1] == '\0')) || endOfOutputString
+   == 0)) {
       state = 1;
     } else if ((inChar == ' ' || inChar == '\n' || inChar == '\0') && (state == 1)) {
       state = 2;
     }
     if (state == 1) {
+      //printf("Added: %c\n", inChar);
       addCharToConvertVar(inChar);
     } else if (state == 2) {
       addConvToOutput();
@@ -144,14 +172,16 @@ void startJob() {
     }
   }
   if (state == 1) addConvToOutput();
-  putc('\n', globalArgs.outputFile);
+  if (globalArgs.inputPath == NULL) putc('\n', globalArgs.outputFile);
 }
 
+//Display usage
 void display_usage(char* name) {
   printf("\nUSAGE:\n%s [-h] \n\nARGS: \n-h: Help\n\n", name);
   exit(EXIT_SUCCESS);
 }
 
+// Get optionns, input and output file paths and validate it
 int getStartData(int argc, char** argv) {
   int opt = 0;
 
@@ -205,19 +235,22 @@ int main(int argc, char** argv) {
   startJob();
 
   if (globalArgs.inputPath == NULL) {
-    endOfOutputString -= 2;
+    endOfOutputString -= 1;
   }
+
   if (endOfOutputString != 0) {
-    if (globalArgs.inputPath != NULL) {
-      for (int i = 0; i < endOfOutputString-1; i++) {
+    if (globalArgs.inputPath == NULL) {
+      for (int i = 0; i <= endOfOutputString; i++) {
+	fprintf(globalArgs.outputFile, "%c", outputString[i]);
+      }
+    } else {
+      for (int i = 0; i < endOfOutputString; i++) {
         fprintf(globalArgs.outputFile, "%c", outputString[i]);
-        } 
-      } else {
-        for (int i = 0; i <= endOfOutputString; i++) {
-          fprintf(globalArgs.outputFile, "%c", outputString[i]);
       }
     }
-    putc('\n', globalArgs.outputFile);
-  return 0;
   }
+
+  if (globalArgs.inputPath == NULL) putc('\n', globalArgs.outputFile);
+
+  return 0;
 }
