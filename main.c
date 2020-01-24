@@ -5,9 +5,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <math.h>
-#ifndef _GNU_SOURCE
 #define _GNU_SOURCE 1
-#endif
 
 const char *optString = "h";
 
@@ -60,20 +58,16 @@ void printHexToDec() {
 
 //Convert dec to hex and print
 void printDecToHex() {
-  //printf("Conv: %s\n", convVariable);
   int number = atoi(convVariable);
   int len = 0;
   while (number > 0) {
     number /= 16;
     len++;
-    //printf("len: %d num: %d\n", len, number);
   }
   char output[len+1];
   output[len] = '\0';
   number = atoi(convVariable);
-  //printf("%d\n", number);
   while (number > 0) {
-    //printf("out[%d]: %c, num: %d, len: %d\n", len - 1, hexNumbers[number % 16], number / 16, len - 1);
     output[len-1] = hexNumbers[number % 16];
     number /= 16;
     len--;
@@ -81,15 +75,12 @@ void printDecToHex() {
 
   addCharToOutput('0');
   addCharToOutput('x');
-
-  //printf("%d\n", strlen(output));
   for (int i = 0; i < strlen(output); i++) {
-    //printf("i: %d, out: %c\n", i, output[i]);
     addCharToOutput(output[i]);
   }
 }
 
-// Just print buffer :)
+// Just print buffer
 void justPrint() {
   for (int i = 0; i < endOfConvVariable; i++) addCharToOutput(convVariable[i]);
 }
@@ -143,17 +134,7 @@ void addConvToOutput() {
 void startJob() {
   short int state = 0;
   char inChar;
-
-  // state 1 - stasrt reading numbers
-  // state 10 - first number is 0
-  // state 2 - reading 0x
-  // state 3 - reading 10
-  // state 4 - finish reading
-  // state 0 - casual reading
-
   while ((inChar=getc(globalArgs.inputFile)) != EOF){
-    //fscanf(globalArgs.inputFile,"%c",&inChar);
-    //printf("Input: %c\n", inChar);
     if ((inChar >= 48 && inChar <= 57) && state == 0 && ((endOfOutputString > 0 && (outputString[endOfOutputString-1] == ' ' || outputString[endOfOutputString-1] == '\n' || outputString[endOfOutputString-1] == '\0')) || endOfOutputString
    == 0)) {
       state = 1;
@@ -161,7 +142,6 @@ void startJob() {
       state = 2;
     }
     if (state == 1) {
-      //printf("Added: %c\n", inChar);
       addCharToConvertVar(inChar);
     } else if (state == 2) {
       addConvToOutput();
@@ -180,7 +160,10 @@ void display_usage(char* name) {
   printf("\nUSAGE:\n%s [-h] \n\nARGS: \n-h: Help\n\n", name);
   exit(EXIT_SUCCESS);
 }
-
+//Default
+void prexit() {
+  exit(EXIT_SUCCESS);
+}
 // Get optionns, input and output file paths and validate it
 int getStartData(int argc, char** argv) {
   int opt = 0;
@@ -192,6 +175,7 @@ int getStartData(int argc, char** argv) {
         display_usage(argv[0]);
         break;
       default:
+        prexit();
         break;
     }
     opt = getopt(argc, argv, optString);
@@ -234,7 +218,7 @@ int main(int argc, char** argv) {
 
   startJob();
 
-  if (globalArgs.inputPath == NULL) {
+  if (globalArgs.inputPath == NULL && strlen(outputString) != 1) {
     endOfOutputString -= 1;
   }
 
