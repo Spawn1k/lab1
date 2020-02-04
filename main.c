@@ -157,12 +157,12 @@ void startJob() {
 
 //Display usage
 void display_usage(char* name) {
-  printf("\nUSAGE:\n%s [-h] \n\nARGS: \n-h: Help\n\n", name);
+  printf("\nUSAGE:\n%s [-h] [input file] [output file]\n\nARGS: \n-h: Help\n\n", name);
   exit(EXIT_SUCCESS);
 }
 //Default
 void prexit() {
-  exit(EXIT_SUCCESS);
+  exit(EXIT_FAILURE);
 }
 // Get optionns, input and output file paths and validate it
 int getStartData(int argc, char** argv) {
@@ -217,7 +217,9 @@ int main(int argc, char** argv) {
   }
 
   startJob();
-
+  if (outputString == NULL) {
+  outputString = (char*)malloc(1 * sizeof(char));
+  }
   if (globalArgs.inputPath == NULL && strlen(outputString) != 1) {
     endOfOutputString -= 1;
   }
@@ -233,8 +235,9 @@ int main(int argc, char** argv) {
       }
     }
   }
-
   if (globalArgs.inputPath == NULL) putc('\n', globalArgs.outputFile);
-
+  free(convVariable);
+  free(outputString);
   return 0;
 }
+
